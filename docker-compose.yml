@@ -1,0 +1,13 @@
+version: '2'
+services:
+  rabbitmq:
+    image: luiscoms/openshift-rabbitmq
+    environment:
+      # RABBITMQ_DEFAULT_VHOST: "test.com"
+      RABBITMQ_ERLANG_COOKIE: 'secret cookie here'
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: password
+    ports:
+      - 8080:15672
+      - 5672
+      - 25672
