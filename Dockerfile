@@ -20,27 +20,26 @@ EXPOSE 15671 15672
 #      io.openshift.expose-services="8080:http" \
 #      io.openshift.tags="builder,x.y.z,etc."
 
-# RUN yum install -y ... && yum clean all -y
-
-# COPY ./.s2i/bin/ ${STI_SCRIPTS_PATH}
-
-# ENV RABBITMQ_CONFIG_FILE=/opt/app-root/config/rabbitmq
-# RUN mkdir -p /opt/app-root/config && echo "[{rabbit,[{loopback_users,[]}]}]." > $RABBITMQ_CONFIG_FILE
-# ENV RABBITMQ_SERVER_ERL_ARGS="-setcookie rabbit"
-# ENV RABBITMQ_CTL_ERL_ARGS="-setcookie rabbit"
-
-RUN chown -R rabbitmq:rabbitmq /opt/app-root && \
-	chown -R rabbitmq:rabbitmq /var/log/rabbitmq/ && \
-	chown -R rabbitmq:rabbitmq /var/lib/rabbitmq && \
-	chown -R rabbitmq:rabbitmq /etc/rabbitmq/ && \
-	chown -R rabbitmq:rabbitmq /usr/sbin/rabbitmq*
-
 # set home so that any `--user` knows where to put the erlang cookie
 ENV HOME /var/lib/rabbitmq
 
-USER "rabbitmq"
+RUN mkdir -p /var/lib/rabbitmq /etc/rabbitmq \
+	&& chown -R rabbitmq:rabbitmq /var/lib/rabbitmq /etc/rabbitmq \
+	&& chmod 777 /var/lib/rabbitmq /etc/rabbitmq
+
+RUN chown -R rabbitmq:rabbitmq /opt/app-root
+# && \
+	# chown -R rabbitmq:rabbitmq /var/log/rabbitmq/ && \
+	# chown -R rabbitmq:rabbitmq /var/lib/rabbitmq && \
+	# chown -R rabbitmq:rabbitmq /etc/rabbitmq/ && \
+	# chown -R rabbitmq:rabbitmq /usr/sbin/rabbitmq*
+VOLUME /var/lib/rabbitmq/
+
+RUN ls -la /var/lib/rabbitmq/
 
 COPY ./docker-entrypoint.sh /usr/local/bin/
+
+USER "rabbitmq"
 # CMD "$STI_SCRIPTS_PATH/run"
 # CMD "/docker-entrypoint.sh"
 ENTRYPOINT ["docker-entrypoint.sh"]
